@@ -40,7 +40,7 @@ type MovieFilter = number | "ALL";
     CarouselComponent,
     LucideCheck,
     LucideChevronDown,
-    LucideClock,
+    // LucideClock,
     LucideFilm,
     LucideReceipt,
     LucideRotateCcw,
