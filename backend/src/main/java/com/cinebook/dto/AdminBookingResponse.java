@@ -26,6 +26,8 @@ public class AdminBookingResponse {
     private String theaterLocation;
 
     private Integer seatsBooked;
+    private Integer activeSeatsCount;
+    private Integer cancelledSeatsCount;
     private String seatNumbers;
 
     private BigDecimal subtotal;
@@ -69,6 +71,12 @@ public class AdminBookingResponse {
 
     public Integer getSeatsBooked() { return seatsBooked; }
     public void setSeatsBooked(Integer seatsBooked) { this.seatsBooked = seatsBooked; }
+
+    public Integer getActiveSeatsCount() { return activeSeatsCount; }
+    public void setActiveSeatsCount(Integer activeSeatsCount) { this.activeSeatsCount = activeSeatsCount; }
+
+    public Integer getCancelledSeatsCount() { return cancelledSeatsCount; }
+    public void setCancelledSeatsCount(Integer cancelledSeatsCount) { this.cancelledSeatsCount = cancelledSeatsCount; }
 
     public String getSeatNumbers() { return seatNumbers; }
     public void setSeatNumbers(String seatNumbers) { this.seatNumbers = seatNumbers; }

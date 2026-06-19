@@ -129,11 +129,9 @@ export class ManageBookingsComponent implements OnInit {
   /** Total count of reservation items in the current scope. */
   readonly totalBookings = computed(() => this.scopedBookings().length);
 
-  /** Cumulative confirmed seats — exclude fully-cancelled bookings from footfall. */
+  /** Cumulative active seats — partial cancellations subtract only the seats that were released. */
   readonly totalFootSteps = computed(() =>
-    this.scopedBookings()
-      .filter((b) => b.status !== "CANCELLED")
-      .reduce((sum, b) => sum + (b.seatsBooked ?? 0), 0)
+    this.scopedBookings().reduce((sum, b) => sum + this.activeSeatCount(b), 0)
   );
 
   /** Net revenue: gross totals minus refunds, so partial cancellations net out. */
@@ -257,5 +255,12 @@ export class ManageBookingsComponent implements OnInit {
   /** Should the TOTAL column project the refund line? */
   hasRefund(b: AdminBooking): boolean {
     return Number(b.refundAmount ?? 0) > 0;
+  }
+
+  private activeSeatCount(b: AdminBooking): number {
+    if (typeof b.activeSeatsCount === "number") {
+      return b.activeSeatsCount;
+    }
+    return b.status === "CANCELLED" ? 0 : b.seatsBooked ?? 0;
   }
 }

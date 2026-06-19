@@ -252,11 +252,9 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
     )
   );
 
-  /** Seats sold — confirmed footfall, excluding fully-cancelled bookings. */
+  /** Seats sold — current confirmed footfall after full or partial cancellations. */
   readonly seatsSold = computed(() =>
-    this.scopedBookings()
-      .filter((b) => b.status !== "CANCELLED")
-      .reduce((sum, b) => sum + (b.seatsBooked ?? 0), 0)
+    this.scopedBookings().reduce((sum, b) => sum + this.activeSeatCount(b), 0)
   );
 
   /** Shows still ahead of "now" in the current movie scope. */
@@ -295,7 +293,7 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
       const date = new Date(b.bookingDate);
       const { key, label, ts } = this.bucketOf(date, grouping);
       const entry = buckets.get(key);
-      const tickets = b.seatsBooked ?? 0;
+      const tickets = this.activeSeatCount(b);
       if (entry) {
         entry.value += tickets;
       } else {
@@ -408,6 +406,13 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
   }
 
   // ── Top-rated movies chart ───────────────────────────────────────────────────
+
+  private activeSeatCount(b: AdminBooking): number {
+    if (typeof b.activeSeatsCount === "number") {
+      return b.activeSeatsCount;
+    }
+    return b.status === "CANCELLED" ? 0 : b.seatsBooked ?? 0;
+  }
 
   readonly topRatedChartData = computed<ChartData<"bar">>(() => {
     const top = [...this.ratings()]

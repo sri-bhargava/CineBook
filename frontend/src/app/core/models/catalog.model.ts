@@ -94,6 +94,10 @@ export interface AdminBooking {
   theaterName: string | null;
   theaterLocation: string | null;
   seatsBooked: number;
+  /** Seats still active after any partial cancellation — use for current footfall. */
+  activeSeatsCount?: number;
+  /** Seats cancelled from this booking, including partial cancellations. */
+  cancelledSeatsCount?: number;
   seatNumbers: string;
   subtotal: number;
   taxAmount: number;

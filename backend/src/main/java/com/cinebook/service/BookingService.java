@@ -113,12 +113,30 @@ public class BookingService {
         Map<Long, User> usersById = userRepository.findAllById(userIds).stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
+        List<Long> bookingIds = bookings.stream().map(Booking::getId).toList();
+        Map<Long, List<String>> activeByBooking = groupSeatLabels(bookingIds, SeatStatus.BOOKED);
+        Map<Long, List<String>> cancelledByBooking = groupSeatLabels(bookingIds, SeatStatus.CANCELLED);
+
         List<AdminBookingResponse> rows = new ArrayList<>(bookings.size());
         for (Booking booking : bookings) {
             Show show = showsById.get(booking.getShowId());
             Movie movie = show == null ? null : moviesById.get(show.getMovieId());
             User user = usersById.get(booking.getUserId());
-            rows.add(toResponse(booking, show, movie, theater, user));
+            int activeSeatsCount = activeByBooking.getOrDefault(booking.getId(), List.of()).size();
+            int cancelledSeatsCount = cancelledByBooking.getOrDefault(booking.getId(), List.of()).size();
+            if (activeSeatsCount == 0 && cancelledSeatsCount == 0
+                    && booking.getStatus() != BookingStatus.CANCELLED) {
+                activeSeatsCount = booking.getSeatsBooked() == null ? 0 : booking.getSeatsBooked();
+            }
+            rows.add(toResponse(
+                    booking,
+                    show,
+                    movie,
+                    theater,
+                    user,
+                    activeSeatsCount,
+                    cancelledSeatsCount
+            ));
         }
         return rows;
     }
@@ -158,7 +176,9 @@ public class BookingService {
     }
 
     private AdminBookingResponse toResponse(Booking booking, Show show, Movie movie,
-                                            Theater theater, User user) {
+                                            Theater theater, User user,
+                                            int activeSeatsCount,
+                                            int cancelledSeatsCount) {
         AdminBookingResponse row = new AdminBookingResponse();
         row.setId(booking.getId());
         row.setUserId(booking.getUserId());
@@ -174,6 +194,8 @@ public class BookingService {
         row.setTheaterLocation(theater == null ? null : theater.getLocation());
 
         row.setSeatsBooked(booking.getSeatsBooked());
+        row.setActiveSeatsCount(activeSeatsCount);
+        row.setCancelledSeatsCount(cancelledSeatsCount);
         row.setSeatNumbers(booking.getSeats());
         row.setSubtotal(booking.getSubtotal());
         row.setTaxAmount(booking.getTaxAmount());
